@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ORBITAL — Abandona la gravedad
 
-## Getting Started
+Landing experimental de temática espacial: un viaje desde la superficie de la Tierra hasta el horizonte de sucesos de un agujero negro, recorrido con el scroll.
 
-First, run the development server:
+**Stack:** Next.js 16 (App Router, Cache Components) · React 19 · Tailwind CSS 4 · Prisma 7 + SQLite · Lenis
+
+## Arrancar
 
 ```bash
+npm install          # ejecuta también prisma generate
+npx prisma migrate dev
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cómo está montada
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| Fondo | `src/components/CosmosCanvas.tsx` | Un fragment shader WebGL a pantalla completa que cambia con el progreso del scroll: horizonte nocturno → estrellas con estelas de velocidad → nebulosas → agujero negro con lente gravitacional |
+| Motor | `src/components/VoyageEngine.tsx` + `src/lib/voyage.ts` | Lenis + un store mutable (progreso, velocidad, ratón) que se lee en cada frame sin re-renderizar React |
+| HUD | `src/components/Hud.tsx` | Altímetro logarítmico, reloj T+, velocidad, coordenadas y navegación |
+| Cursor | `src/components/Cursor.tsx` | Retícula con líneas de mira; `data-cursor="texto"` muestra una etiqueta |
+| Secciones | `src/components/sections/*` | Hero (tipografía variable + ingravidez), Manifiesto (revelado palabra a palabra), Ruta (scroll horizontal con planetas CSS/SVG), Nave (wireframe 3D en canvas), Clases (pases holográficos), Embarque |
+| Datos | `prisma/schema.prisma`, `src/app/actions.ts` | Modelo `Passenger` + server action `reserveSeat` (validación con zod, asignación de asiento) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Respeta `prefers-reduced-motion` (sin Lenis, ignición rápida, sin animaciones de superficie).

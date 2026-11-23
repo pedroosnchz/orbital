@@ -1,26 +1,248 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --void: #020205;
+  --signal: #c6ff3d; /* verde fósforo: color de señal del HUD */
+  --flare: #ff6a2b;
+  --p: 0;
+  --v: 0;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-void: var(--void);
+  --color-signal: var(--signal);
+  --color-flare: var(--flare);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono-hud);
+  --font-display: var(--font-unbounded);
+  --font-serif: var(--font-instrument);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--void);
+  color: #f4f4f6;
+  color-scheme: dark;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: transparent;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--signal);
+  color: #000;
+}
+
+/* ---------- Cursor ---------- */
+html.has-cursor,
+html.has-cursor * {
+  cursor: none !important;
+}
+html.has-cursor .cursor-layer {
+  display: block;
+}
+.cursor-ring svg {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.cursor-ring.is-active svg {
+  transform: rotate(45deg);
+}
+
+/* ---------- Grano/escaneo de pantalla ---------- */
+.scanlines {
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.018) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* ---------- Ignición ---------- */
+.ignition-half {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50.5%;
+  background: var(--void);
+  transition: transform 1.3s cubic-bezier(0.8, 0, 0.1, 1);
+}
+.ignition-half.top {
+  top: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--signal) 60%, transparent);
+}
+.ignition-half.bottom {
+  bottom: 0;
+}
+.ignition.is-done .ignition-half.top {
+  transform: translateY(-101%);
+}
+.ignition.is-done .ignition-half.bottom {
+  transform: translateY(101%);
+}
+.ignition-content {
+  transition: opacity 0.4s, transform 1.2s cubic-bezier(0.8, 0, 0.1, 1), filter 0.6s;
+}
+.ignition.is-done .ignition-content {
+  opacity: 0;
+  transform: scale(1.6);
+  filter: blur(12px);
+}
+.ignition-digit {
+  animation: digit-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes digit-in {
+  from {
+    transform: translateY(60%) rotate(4deg);
+    opacity: 0;
+    filter: blur(10px);
+  }
+}
+.ignition-log {
+  animation: log-in 0.4s steps(6) both;
+}
+@keyframes log-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+/* ---------- Reveal genérico ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(8px);
+  transition: opacity 1.1s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.1s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--d, 0s);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* Línea que se dibuja */
+.rule {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.6s cubic-bezier(0.7, 0, 0.2, 1);
+}
+.is-in .rule,
+.rule.is-in {
+  transform: scaleX(1);
+}
+
+/* ---------- Planetas CSS ---------- */
+.planet {
+  position: relative;
+  border-radius: 9999px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.planet::before {
+  /* textura de superficie que rota */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--tex);
+  background-size: 200% 100%;
+  animation: spin-surface var(--spin, 40s) linear infinite;
+  filter: var(--tex-filter, none);
+}
+.planet::after {
+  /* sombreado esférico + terminador */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.22), transparent 30%),
+    radial-gradient(circle at 34% 30%, transparent 0 26%, rgba(0, 0, 0, 0.55) 52%, rgba(0, 0, 0, 0.97) 74%);
+  box-shadow: inset -40px -30px 70px rgba(0, 0, 0, 0.85), inset 6px 5px 18px rgba(255, 255, 255, 0.1);
+}
+@keyframes spin-surface {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- Marquesina ---------- */
+.marquee {
+  animation: marquee var(--dur, 40s) linear infinite;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Pase holográfico ---------- */
+.holo {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.holo-foil {
+  background: radial-gradient(
+      circle at var(--mx) var(--my),
+      rgba(255, 255, 255, 0.35),
+      transparent 40%
+    ),
+    conic-gradient(
+      from calc(var(--ry) * 8) at var(--mx) var(--my),
+      #ff6a2b33,
+      #c6ff3d33,
+      #3dd9ff33,
+      #b13dff33,
+      #ff6a2b33
+    );
+  mix-blend-mode: color-dodge;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.holo:hover .holo-foil {
+  opacity: 1;
+}
+
+/* Texto con contorno */
+.outline-text {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.35);
+}
+
+/* Barcode */
+.barcode span {
+  display: inline-block;
+  height: 100%;
+  background: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planet::before,
+  .marquee {
+    animation: none;
+  }
+  .reveal {
+    transition-duration: 0.01s;
+  }
+}
+
+@keyframes pass-in {
+  from {
+    opacity: 0;
+    transform: perspective(1000px) rotateX(40deg) translateY(120px) scale(0.9);
+    filter: blur(10px);
+  }
 }
